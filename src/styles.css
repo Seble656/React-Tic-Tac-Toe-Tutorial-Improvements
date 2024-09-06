@@ -88,3 +88,6 @@ body {
 .game-info {
   margin-left: 20px;
 }
+.winning-square {
+  background-color: yellow; /* This highlights the winning squares */
+}
