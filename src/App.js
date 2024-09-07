@@ -1,15 +1,19 @@
 import { useState } from 'react';
 
-function Square({ value, onSquareClick }) {
+function Square({ value, onSquareClick, winning }) {
+
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button className={`square ${winning ? 'winning-square' : ''}`} onClick={onSquareClick}>
       {value}
     </button>
   );
 }
 
 function Board({ xIsNext, squares, onPlay }) {
+  let status;
+
   function handleClick(i) {
+    
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
@@ -22,12 +26,17 @@ function Board({ xIsNext, squares, onPlay }) {
     onPlay(nextSquares);
   }
 
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = 'Winner: ' + winner;
+  const result = calculateWinner(squares);
+  const winningSquares = result ? result.winningSquares : [];
+
+
+  if (result) {
+    status = 'Winner: ' + result.winner;
   } else {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+  }
+  if (!squares.includes(null) && !calculateWinner(squares)) {
+    status = 'The Game is a Draw';
   }
 
   function renderSquares() {
@@ -40,7 +49,7 @@ function Board({ xIsNext, squares, onPlay }) {
       for (let k = 0; k < 3; k++) {
         // captures the current value of counter during each loop iteration to avoid any unexpected behavior with closures. 
         const currentCounter = counter;
-        row.push(<Square key={currentCounter} value={squares[currentCounter]} onSquareClick={() => handleClick(currentCounter)} />);
+        row.push(<Square key={currentCounter} value={squares[currentCounter]} onSquareClick={() => handleClick(currentCounter)} winning={winningSquares.includes(currentCounter)} />);
         counter++;
       }
 
@@ -130,7 +139,7 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return { winner: squares[a], winningSquares: [a, b, c] };
     }
   }
   return null;
